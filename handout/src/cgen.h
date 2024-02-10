@@ -26,51 +26,51 @@ class CgenNode;
 // The CgenClassTable constructor is where you'll find the entry point for
 // code generation for an entire Cool program.
 class CgenClassTable : public cool::SymbolTable<CgenNode> {
-public:
-  // CgenClassTable constructor begins and ends the code generation process
-  CgenClassTable(Classes, std::ostream &str);
+  public:
+    // CgenClassTable constructor begins and ends the code generation process
+    CgenClassTable(Classes, std::ostream &str);
 
-private:
-  // The following creates an inheritance graph from a list of classes.
-  // The graph is implemented as a tree of `CgenNode', and class names
-  // are placed in the base class symbol table.
-  void install_basic_classes();
-  void install_classes(Classes cs);
-  void install_class(CgenNode *nd);
-  void install_special_class(CgenNode *nd);
-  void build_inheritance_tree();
-  void set_relations(CgenNode *nd);
-  // Create declarations for C runtime functions we need to generate code
-  void setup_external_functions();
-  void setup_classes(CgenNode *c, int depth);
+  private:
+    // The following creates an inheritance graph from a list of classes.
+    // The graph is implemented as a tree of `CgenNode', and class names
+    // are placed in the base class symbol table.
+    void install_basic_classes();
+    void install_classes(Classes cs);
+    void install_class(CgenNode *nd);
+    void install_special_class(CgenNode *nd);
+    void build_inheritance_tree();
+    void set_relations(CgenNode *nd);
+    // Create declarations for C runtime functions we need to generate code
+    void setup_external_functions();
+    void setup_classes(CgenNode *c, int depth);
 
   // TODO: implement the following functions.
   // Setup each class in the table and prepare for code generation phase
   void setup();
   // Code generation functions. You need to write these functions.
   void code_module();
-#ifdef LAB2
-  void code_classes(CgenNode *c);
-#endif
-  void code_constants();
-  void code_main();
+  #ifdef LAB2
+    void code_classes(CgenNode *c);
+  #endif
+    void code_constants();
+    void code_main();
 
-  /* Util functions */
-#ifndef LAB2
-  CgenNode *getMainmain(CgenNode *c);
-#endif
-  CgenNode *root(); // Get the root of the class Tree, i.e. Object
-public:
-  int get_num_classes() const { return current_tag; }
+    /* Util functions */
+  #ifndef LAB2
+    CgenNode *getMainmain(CgenNode *c);
+  #endif
+    CgenNode *root(); // Get the root of the class Tree, i.e. Object
+  public:
+    int get_num_classes() const { return current_tag; }
 
-private:
-  // Class lists and current class tag
-  std::vector<CgenNode *> nds, special_nds;
-  int current_tag;
+  private:
+    // Class lists and current class tag
+    std::vector<CgenNode *> nds, special_nds;
+    int current_tag;
 
-public:
-  // The ostream where we are emitting code
-  std::ostream *ct_stream;
+  public:
+    // The ostream where we are emitting code
+    std::ostream *ct_stream;
 };
 
 // Each CgenNode corresponds to a Cool class. As such, it is responsible for

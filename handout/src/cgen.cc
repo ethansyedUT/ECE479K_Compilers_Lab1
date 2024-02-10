@@ -368,26 +368,62 @@ void CgenClassTable::code_constants() {
 // by generating the code to execute (new Main).main()
 //
 void CgenClassTable::code_main(){
-// TODO: add code here
+  // TODO: add code here
 
-// Define a function main that has no parameters and returns an i32
+  // Define a function main that has no parameters and returns an i32
 
-// Define an entry basic block
+  std::string mainName = "main";
+  op_type i32(INT32);
+  op_type i8(INT8);
+  op_type i8ptr(INT8_PTR);
+  op_type vd(VOID);
+  op_arr_type i8arr(INT8, 25);
+  op_arr_type i32arr(INT32_PTR);
 
-// Call Main_main(). This returns int for phase 1, Object for phase 2
 
-#ifdef LAB2
-// LAB2
-#else
-// Lab1
-// Get the address of the string "Main_main() returned %d\n" using
-// getelementptr
+  ValuePrinter vp(*ct_stream);
 
-// Call printf with the string address of "Main_main() returned %d\n"
-// and the return value of Main_main() as its arguments
+  std::vector<operand> non;
+  std::vector<op_type> null;
 
-// Insert return 0
-#endif
+  operand nun = operand();
+
+  const_value str = const_value(i8arr, "Main_main() returned %d\n", true);
+  vp.init_constant(".str", str);
+  
+  vp.define(i32, "main", non);
+
+    // Define an entry basic block
+  vp.begin_block("entry");
+
+  // Call Main_main(). This returns int for phase 1, Object for phase 2
+  //operand return call
+  operand ret = vp.call(null, i32, "Main_main", true, non);
+  const_value re = const_value(i32, ret.get_name(), false);
+  
+
+  #ifdef LAB2
+  // LAB2
+  #else
+  // Lab1
+  // Get the address of the string "Main_main() returned %d\n" using
+  // getelementptr
+  operand arg1 = vp.getelementptr(i8arr, nun, nun, i32);
+  // Call printf with the string address of "Main_main() returned %d\n"
+  // and the return value of Main_main() as its arguments
+
+  std::vector<operand> args;
+  args.push_back(arg1);
+  args.push_back(ret);
+
+  vp.call(null, i32arr, "printf", true, args);
+
+  // Insert return 0
+  vp.ret(re);
+  vp.end_define();
+
+  
+  #endif
 }
 
 // Get the root of the class tree.
@@ -508,6 +544,34 @@ void CgenNode::codeGenMainmain() {
   // Generally what you need to do are:
   // -- setup or create the environment, env, for translating this method
   // -- invoke mainMethod->code(env) to translate the method
+
+  
+  /*
+    class__class(Symbol a1, Symbol a2, Features a3, Symbol a4) {
+    name = a1;
+    parent = a2;
+    features = a3;
+    filename = a4;
+  }
+  */
+  Symbol name = new StringEntry("Main", 0);
+  Symbol nothing = new StringEntry();
+  Features none = single_Features(mainMethod->copy_Feature());
+  Symbol fileName = new StringEntry("test.cl", 0);
+  Class_ BigMain = class_(name, nothing, none, fileName);
+
+
+  //CgenClassTable* startTable = new CgenClassTable(myClasses, *ct_stream);
+
+
+  //CgenNode(Class_ c, Basicness bstatus, CgenClassTable *class_table)
+  CgenNode* start = new CgenNode(BigMain, Basic, class_table);
+
+
+  //CgenEnvironment(std::ostream &stream, CgenNode *cur_class)
+  CgenEnvironment env = CgenEnvironment(*ct_stream, start);
+  
+  mainMethod -> code(&env);
 }
 
 #endif
