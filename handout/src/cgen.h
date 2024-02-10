@@ -20,6 +20,34 @@
 
 class CgenNode;
 
+
+//custom classes (debugging)
+class testField {
+  //TODO: Add operand support
+  protected:
+      //variables
+    std::string name;
+    op_type op;
+
+  public:
+    //constructors
+    testField(std::string nm, op_type optype){
+      name = nm;
+      op = optype;
+    };
+
+    //functions
+      friend std::ostream&
+    operator<<(std::ostream& os, const testField obj){
+      os << "Name: " << obj.name << "\t|\t" <<  "IR: " << obj.op.get_name() << std::endl;
+      return os;
+    } 
+
+};
+
+//my global function definitions
+void value_printer_tester(ValuePrinter vp,std::vector<operand> operandsToTest, std::vector<testField> op_typeToTest);
+
 // CgenClassTable represents the top level of a Cool program, which is
 // basically a list of classes. The class table is used to look up classes
 // (CgenNodes) by name, and it also handles global code generation tasks.
@@ -179,6 +207,7 @@ public:
   void close_scope() { var_table.exitscope(); }
 
   // TODO: Add more functions as necessary.
+  
 
 private:
   cool::SymbolTable<operand>

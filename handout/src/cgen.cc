@@ -373,15 +373,60 @@ void CgenClassTable::code_main(){
   // Define a function main that has no parameters and returns an i32
 
   std::string mainName = "main";
-  op_type i32(INT32);
+
+
+  op_type i1(INT1);
+  op_type i1ptr(INT1_PTR);
+  op_type i1pptr(INT1_PPTR);
+
   op_type i8(INT8);
   op_type i8ptr(INT8_PTR);
+  op_type i8pptr(INT8_PPTR);
+
+  op_type i32(INT32);
+  op_type i32ptr(INT32_PTR);
+  op_type i32pptr(INT32_PPTR);
+
   op_type vd(VOID);
+
+  op_type va(VAR_ARG);
+
   op_arr_type i8arr(INT8, 25);
-  op_arr_type i32arr(INT32_PTR);
+  op_arr_type i32arr(INT32, 1);
 
 
   ValuePrinter vp(*ct_stream);
+
+  //Test vectors
+  std::vector<operand> testops;
+
+  std::vector<testField> testop_types;
+
+  testop_types.push_back(testField("INT1", i1));
+  testop_types.push_back(testField("INT1_PTR", i1ptr));
+  testop_types.push_back(testField("INT1_PPTR", i1pptr));
+
+  testop_types.push_back(testField("INT8", i8));
+  testop_types.push_back(testField("INT8_PTR", i8ptr));
+  testop_types.push_back(testField("INT8_PPTR", i8pptr));
+  testop_types.push_back(testField("INT8_ARR", i8arr));
+
+  testop_types.push_back(testField("INT32", i32));
+  testop_types.push_back(testField("INT32_PTR", i32ptr));
+  testop_types.push_back(testField("INT32_PPTR", i32pptr));
+  testop_types.push_back(testField("INT32_ARR", i32arr));
+
+  testop_types.push_back(testField("VOID", vd));
+  testop_types.push_back(testField("VAR_ARG", va));
+
+  //Trying subclasses
+  
+
+  //sub-classes
+  // testop_types.push_back(i8arr);
+  // testop_types.push_back(i32arr);
+
+  value_printer_tester(vp, testops, testop_types);
 
   std::vector<operand> non;
   std::vector<op_type> null;
@@ -424,6 +469,19 @@ void CgenClassTable::code_main(){
 
   
   #endif
+}
+
+//function to test Value_printer functions
+void value_printer_tester(ValuePrinter vp, std::vector<operand> operandsToTest, std::vector<testField> op_typesToTest){
+  using namespace std;
+  cerr<<"===============================================";
+  cerr<<"\n\nTesting:\n\n";
+  
+  cerr << "op_types IR return:\n\n";
+  for (auto op_typeTest = op_typesToTest.begin(); op_typeTest != op_typesToTest.end(); ++op_typeTest){
+      cerr << *op_typeTest;
+  }
+  cerr<<"\n===============================================\n";
 }
 
 // Get the root of the class tree.

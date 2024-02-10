@@ -8,7 +8,7 @@ define i32 @main() {
 entry:
 	%vtpm.0 = call i32 @Main_main(  )
 	%vtpm.1 = getelementptr [25 x i8],  ,  
-	%vtpm.2 = call [2 x i32**] @printf( i32 %vtpm.1, i32 %vtpm.0 )
+	%vtpm.2 = call [1 x i32] @printf( i32 %vtpm.1, i32 %vtpm.0 )
 	ret i32 %vtpm.0
 }
 
