@@ -392,47 +392,57 @@ void CgenClassTable::code_main(){
   op_type va(VAR_ARG);
 
   op_arr_type i8arr(INT8, 25);
-  op_arr_type i32arr(INT32, 1);
+  op_arr_ptr_type i8arrptr(INT8, 25);
+  op_arr_type i32arr(INT32_PTR, 1);
 
 
   ValuePrinter vp(*ct_stream);
 
   //Test vectors
-  std::vector<operand> testops;
-
+ 
+  //Testing op_types
   std::vector<testField> testop_types;
 
-  testop_types.push_back(testField("INT1", i1));
-  testop_types.push_back(testField("INT1_PTR", i1ptr));
-  testop_types.push_back(testField("INT1_PPTR", i1pptr));
+  testop_types.push_back(testField("INT1", &i1));
+  testop_types.push_back(testField("INT1_PTR", &i1ptr));
+  testop_types.push_back(testField("INT1_PPTR", &i1pptr));
 
-  testop_types.push_back(testField("INT8", i8));
-  testop_types.push_back(testField("INT8_PTR", i8ptr));
-  testop_types.push_back(testField("INT8_PPTR", i8pptr));
-  testop_types.push_back(testField("INT8_ARR", i8arr));
+  testop_types.push_back(testField("INT8", &i8));
+  testop_types.push_back(testField("INT8_PTR", &i8ptr));
+  testop_types.push_back(testField("INT8_PPTR", &i8pptr));
+  testop_types.push_back(testField("INT8_ARR", &i8arr));
 
-  testop_types.push_back(testField("INT32", i32));
-  testop_types.push_back(testField("INT32_PTR", i32ptr));
-  testop_types.push_back(testField("INT32_PPTR", i32pptr));
-  testop_types.push_back(testField("INT32_ARR", i32arr));
+  testop_types.push_back(testField("INT32", &i32));
+  testop_types.push_back(testField("INT32_PTR", &i32ptr));
+  testop_types.push_back(testField("INT32_PPTR", &i32pptr));
+  testop_types.push_back(testField("INT32_ARR", &i32arr));
 
-  testop_types.push_back(testField("VOID", vd));
-  testop_types.push_back(testField("VAR_ARG", va));
+  testop_types.push_back(testField("VOID", &vd));
+  testop_types.push_back(testField("VAR_ARG", &va));
 
-  //Trying subclasses
-  
 
-  //sub-classes
-  // testop_types.push_back(i8arr);
-  // testop_types.push_back(i32arr);
+  //Trying op_type subclasses
+  testop_types.push_back(testField("INT8_PTR", &i8arr));
+  testop_types.push_back(testField("INT8_PPTR", &i8arrptr));
+  testop_types.push_back(testField("INT32_PTR", &i32arr));
 
-  value_printer_tester(vp, testops, testop_types);
+  //Testing operands
+  std::vector<testField> testops;
+
+
+
 
   std::vector<operand> non;
   std::vector<op_type> null;
 
   operand nun = operand();
+  int_value zero = int_value(0);
+  const_value cv = const_value(i8arrptr, ".str", true);
+  //testops.push_back(testField(&cv));
+  
+ 
 
+  //of operand type
   const_value str = const_value(i8arr, "Main_main() returned %d\n", true);
   vp.init_constant(".str", str);
   
@@ -443,9 +453,7 @@ void CgenClassTable::code_main(){
 
   // Call Main_main(). This returns int for phase 1, Object for phase 2
   //operand return call
-  operand ret = vp.call(null, i32, "Main_main", true, non);
-  const_value re = const_value(i32, ret.get_name(), false);
-  
+  operand ret = vp.call(null, i32, "Main_main", true, non);  
 
   #ifdef LAB2
   // LAB2
@@ -453,35 +461,44 @@ void CgenClassTable::code_main(){
   // Lab1
   // Get the address of the string "Main_main() returned %d\n" using
   // getelementptr
-  operand arg1 = vp.getelementptr(i8arr, nun, nun, i32);
+  operand arg1 = vp.getelementptr(i8arr, cv, zero, zero, i8ptr);
   // Call printf with the string address of "Main_main() returned %d\n"
   // and the return value of Main_main() as its arguments
+  std::vector<op_type> argTypes;
+  argTypes.push_back(i8ptr);
+  argTypes.push_back(va);
 
   std::vector<operand> args;
   args.push_back(arg1);
   args.push_back(ret);
 
-  vp.call(null, i32arr, "printf", true, args);
+  vp.call(argTypes, i32, "printf", true, args);
 
   // Insert return 0
-  vp.ret(re);
+  vp.ret(zero);
   vp.end_define();
 
+  value_printer_tester(vp, testops, testop_types);
   
   #endif
 }
 
 //function to test Value_printer functions
-void value_printer_tester(ValuePrinter vp, std::vector<operand> operandsToTest, std::vector<testField> op_typesToTest){
+void value_printer_tester(ValuePrinter vp, std::vector<testField> operandsToTest, std::vector<testField> op_typesToTest){
   using namespace std;
   cerr<<"===============================================";
   cerr<<"\n\nTesting:\n\n";
   
   cerr << "op_types IR return:\n\n";
   for (auto op_typeTest = op_typesToTest.begin(); op_typeTest != op_typesToTest.end(); ++op_typeTest){
-      cerr << *op_typeTest;
+      cerr << *op_typeTest << std::endl;
   }
-  cerr<<"\n===============================================\n";
+
+  cerr << "\nOperands to Test:\n\n";
+  for (auto opers = operandsToTest.begin(); opers != operandsToTest.end(); ++opers){
+    cerr << *opers << std::endl;
+  }
+  cerr<<"===============================================\n";
 }
 
 // Get the root of the class tree.

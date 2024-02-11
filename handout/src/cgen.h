@@ -27,26 +27,44 @@ class testField {
   protected:
       //variables
     std::string name;
-    op_type op;
+    op_type *opType = nullptr;
+    operand *oper = nullptr;
 
   public:
     //constructors
-    testField(std::string nm, op_type optype){
+    testField(std::string nm, op_type* optype){
       name = nm;
-      op = optype;
+      opType = optype;
     };
+    testField(operand* operandd){
+      name = operandd->get_name();
+      oper = operandd;
+      *opType = oper->get_type();
+    };
+    testField(std::string title){
+      name = title;
+    }
 
     //functions
       friend std::ostream&
     operator<<(std::ostream& os, const testField obj){
-      os << "Name: " << obj.name << "\t|\t" <<  "IR: " << obj.op.get_name() << std::endl;
+      if(!obj.oper && !obj.opType){
+        os << "\n" << "============== " << obj.name << " ==============" << std::endl;
+      }else{
+        if(obj.oper){
+          os << "Operand Name: " << obj.name << "\t|\t" <<  "Type Name: " << obj.oper->get_typename();
+        }
+        if(obj.opType){
+          os << "Op_type Name: " << obj.name << "\t|\t" <<  "IR: " << obj.opType->get_name();
+        }
+      }
       return os;
     } 
 
 };
 
 //my global function definitions
-void value_printer_tester(ValuePrinter vp,std::vector<operand> operandsToTest, std::vector<testField> op_typeToTest);
+void value_printer_tester(ValuePrinter vp,std::vector<testField> operandsToTest, std::vector<testField> op_typeToTest);
 
 // CgenClassTable represents the top level of a Cool program, which is
 // basically a list of classes. The class table is used to look up classes
