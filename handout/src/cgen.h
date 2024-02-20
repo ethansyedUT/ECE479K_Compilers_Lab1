@@ -20,119 +20,141 @@
 
 class CgenNode;
 
+// custom classes (debugging)
+class testField
+{
+  // TODO: Add operand support
+protected:
+  // variables
+  std::string name;
+  op_type *opType = nullptr;
+  operand *oper = nullptr;
+  ValuePrinter *valPrint = nullptr;
 
-//custom classes (debugging)
-class testField {
-  //TODO: Add operand support
-  protected:
-      //variables
-    std::string name;
-    op_type *opType = nullptr;
-    operand *oper = nullptr;
+public:
+  // constructors
+  testField(std::string nm, op_type *optype)
+  {
+    name = nm;
+    opType = optype;
+  };
+  testField(operand *operandd)
+  {
+    name = operandd->get_name();
+    oper = operandd;
+  };
+  testField(std::string title)
+  {
+    name = title;
+  }
 
-  public:
-    //constructors
-    testField(std::string nm, op_type* optype){
-      name = nm;
-      opType = optype;
-    };
-    testField(operand* operandd){
-      name = operandd->get_name();
-      oper = operandd;
-      *opType = oper->get_type();
-    };
-    testField(std::string title){
-      name = title;
+  // functions
+  friend std::ostream &
+  operator<<(std::ostream &os, const testField obj)
+  {
+    if (!obj.oper && !obj.opType)
+    {
+      os << "\n"
+         << "============== " << obj.name << " ==============" << std::endl;
     }
-
-    //functions
-      friend std::ostream&
-    operator<<(std::ostream& os, const testField obj){
-      if(!obj.oper && !obj.opType){
-        os << "\n" << "============== " << obj.name << " ==============" << std::endl;
-      }else{
-        if(obj.oper){
-          os << "Operand Name: " << obj.name << "\t|\t" <<  "Type Name: " << obj.oper->get_typename();
-        }
-        if(obj.opType){
-          os << "Op_type Name: " << obj.name << "\t|\t" <<  "IR: " << obj.opType->get_name();
-        }
+    else
+    {
+      if (obj.oper)
+      {
+        os << "Name: " << obj.name << "\t|\t"
+           << "Type: " << obj.oper->get_typename();
       }
-      return os;
-    } 
-
+      if (obj.opType)
+      {
+        os << "Name: " << obj.name << "\t|\t"
+           << "IR: " << obj.opType->get_name();
+      }
+    }
+    return os;
+  }
 };
 
-//my global function definitions
-void value_printer_tester(ValuePrinter vp,std::vector<testField> operandsToTest, std::vector<testField> op_typeToTest);
+// my global function definitions
+void value_printer_tester(ValuePrinter vp, std::vector<testField> operandsToTest, std::vector<testField> op_typeToTest);
 
 // CgenClassTable represents the top level of a Cool program, which is
 // basically a list of classes. The class table is used to look up classes
 // (CgenNodes) by name, and it also handles global code generation tasks.
 // The CgenClassTable constructor is where you'll find the entry point for
 // code generation for an entire Cool program.
-class CgenClassTable : public cool::SymbolTable<CgenNode> {
-  public:
-    // CgenClassTable constructor begins and ends the code generation process
-    CgenClassTable(Classes, std::ostream &str);
+class CgenClassTable : public cool::SymbolTable<CgenNode>
+{
+public:
+  // CgenClassTable constructor begins and ends the code generation process
+  CgenClassTable(Classes, std::ostream &str);
 
-  private:
-    // The following creates an inheritance graph from a list of classes.
-    // The graph is implemented as a tree of `CgenNode', and class names
-    // are placed in the base class symbol table.
-    void install_basic_classes();
-    void install_classes(Classes cs);
-    void install_class(CgenNode *nd);
-    void install_special_class(CgenNode *nd);
-    void build_inheritance_tree();
-    void set_relations(CgenNode *nd);
-    // Create declarations for C runtime functions we need to generate code
-    void setup_external_functions();
-    void setup_classes(CgenNode *c, int depth);
+private:
+  // The following creates an inheritance graph from a list of classes.
+  // The graph is implemented as a tree of `CgenNode', and class names
+  // are placed in the base class symbol table.
+  void install_basic_classes();
+  void install_classes(Classes cs);
+  void install_class(CgenNode *nd);
+  void install_special_class(CgenNode *nd);
+  void build_inheritance_tree();
+  void set_relations(CgenNode *nd);
+  // Create declarations for C runtime functions we need to generate code
+  void setup_external_functions();
+  void setup_classes(CgenNode *c, int depth);
 
   // TODO: implement the following functions.
+  std::vector<CgenNode *> getNds()
+  {
+    return nds;
+  }
   // Setup each class in the table and prepare for code generation phase
   void setup();
   // Code generation functions. You need to write these functions.
   void code_module();
-  #ifdef LAB2
-    void code_classes(CgenNode *c);
-  #endif
-    void code_constants();
-    void code_main();
+#ifdef LAB2
+  void code_classes(CgenNode *c);
+#endif
+  void code_constants();
+  void code_main();
 
-    /* Util functions */
-  #ifndef LAB2
-    CgenNode *getMainmain(CgenNode *c);
-  #endif
-    CgenNode *root(); // Get the root of the class Tree, i.e. Object
-  public:
-    int get_num_classes() const { return current_tag; }
+  /* Util functions */
+#ifndef LAB2
+  CgenNode *getMainmain(CgenNode *c);
+#endif
+  CgenNode *root(); // Get the root of the class Tree, i.e. Object
+public:
+  int get_num_classes() const { return current_tag; }
 
-  private:
-    // Class lists and current class tag
-    std::vector<CgenNode *> nds, special_nds;
-    int current_tag;
+private:
+  // Class lists and current class tag
+  std::vector<CgenNode *> nds, special_nds;
+  int current_tag;
 
-  public:
-    // The ostream where we are emitting code
-    std::ostream *ct_stream;
+public:
+  // The ostream where we are emitting code
+  std::ostream *ct_stream;
 };
 
 // Each CgenNode corresponds to a Cool class. As such, it is responsible for
 // performing code generation on the class level. This includes laying out
 // the class attributes, creating the necessary Types for the class and
 // generating code for each of its methods.
-class CgenNode : public class__class {
+class CgenNode : public class__class
+{
 public:
-  enum Basicness { Basic, NotBasic };
+  enum Basicness
+  {
+    Basic,
+    NotBasic
+  };
   CgenNode(Class_ c, Basicness bstatus, CgenClassTable *class_table)
       : class__class((const class__class &)*c), parentnd(0), children(0),
         basic_status(bstatus), class_table(class_table), tag(-1),
         ct_stream(class_table->ct_stream) {}
 
   // Relationships with other nodes in the tree
-  void set_parent(CgenNode *p) {
+  void set_parent(CgenNode *p)
+  {
     assert(this->parentnd == nullptr && p != nullptr);
     p->children.push_back(this);
     this->parentnd = p;
@@ -148,10 +170,12 @@ public:
 
 #ifdef LAB2
   std::string get_type_name() { return name->get_string(); }
-  std::string get_vtable_type_name() {
+  std::string get_vtable_type_name()
+  {
     return "_" + get_type_name() + "_vtable";
   }
-  std::string get_vtable_name() {
+  std::string get_vtable_name()
+  {
     return "_" + get_type_name() + "_vtable_prototype";
   }
   std::string get_init_function_name() { return get_type_name() + "_new"; }
@@ -159,6 +183,10 @@ public:
 
   // TODO: Complete the implementations of following functions
   // and add more as necessary
+  CgenNode *get_parentNode()
+  {
+    return parentnd;
+  }
 
   // Class setup. You need to write the body of this function.
   void setup(int tag, int depth);
@@ -190,22 +218,27 @@ private:
 // variables are declared, and so on. CgenEnvironment is also a good place
 // to put non-local information you will need during code generation. Two
 // examples are the current CgenNode and the current Function.
-class CgenEnvironment {
+class CgenEnvironment
+{
 public:
   // Class CgenEnvironment should be constructed by a class prior to code
   // generation for each method. You may need to add parameters to this
   // constructor.
   CgenEnvironment(std::ostream &stream, CgenNode *cur_class)
       : var_table(), cur_class(cur_class), block_count(0), tmp_count(0),
-        ok_count(0), cur_stream(&stream) {
+        ok_count(0), cur_stream(&stream)
+  {
     var_table.enterscope();
-    // TODO: add code here
+    // TODO: Walk here for variables???
+    // cur_class->dump(*cur_stream, 10);
+    var_table.exitscope();
   }
 
   // fresh name generation functions
   std::string new_name() { return "tmp." + std::to_string(tmp_count++); }
   std::string new_ok_label() { return "ok." + std::to_string(ok_count++); }
-  std::string new_label(const std::string &prefix, bool increment) {
+  std::string new_label(const std::string &prefix, bool increment)
+  {
     std::string suffix = std::to_string(block_count);
     block_count += increment;
     return prefix + suffix;
@@ -217,7 +250,8 @@ public:
   // Must return the CgenNode for a class given the symbol of its name
   CgenNode *type_to_class(Symbol t);
 
-  operand *find_in_scopes(Symbol name) {
+  operand *find_in_scopes(Symbol name)
+  {
     return var_table.find_in_scopes(name);
   }
   void add_binding(Symbol name, operand *op) { var_table.insert(name, op); }
@@ -225,7 +259,6 @@ public:
   void close_scope() { var_table.exitscope(); }
 
   // TODO: Add more functions as necessary.
-  
 
 private:
   cool::SymbolTable<operand>

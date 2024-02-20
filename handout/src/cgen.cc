@@ -40,7 +40,8 @@ EXTERN Symbol
     arg, arg2, newobj, Mainmain, prim_string, prim_int, prim_bool;
 
 // Initializing the predefined symbols.
-static void initialize_constants(void) {
+static void initialize_constants(void)
+{
   Object = idtable.add_string("Object");
   IO = idtable.add_string("IO");
   String = idtable.add_string("String");
@@ -83,7 +84,8 @@ static void initialize_constants(void) {
 
 // CgenClassTable constructor orchestrates all code generation
 CgenClassTable::CgenClassTable(Classes classes, std::ostream &s)
-    : nds(0), current_tag(0) {
+    : nds(0), current_tag(0)
+{
   if (cgen_debug)
     std::cerr << "Building CgenClassTable" << std::endl;
   ct_stream = &s;
@@ -105,7 +107,8 @@ CgenClassTable::CgenClassTable(Classes classes, std::ostream &s)
 }
 
 // Creates AST nodes for the basic classes and installs them in the class list
-void CgenClassTable::install_basic_classes() {
+void CgenClassTable::install_basic_classes()
+{
   // The tree package uses these globals to annotate the classes built below.
   curr_lineno = 0;
   Symbol filename = stringtable.add_string("<basic class>");
@@ -237,16 +240,20 @@ void CgenClassTable::install_basic_classes() {
 }
 
 // install_classes enters a list of classes in the symbol table.
-void CgenClassTable::install_classes(Classes cs) {
-  for (auto cls : cs) {
+void CgenClassTable::install_classes(Classes cs)
+{
+  for (auto cls : cs)
+  {
     install_class(new CgenNode(cls, CgenNode::NotBasic, this));
   }
 }
 
 // Add this CgenNode to the class list and the lookup table
-void CgenClassTable::install_class(CgenNode *nd) {
+void CgenClassTable::install_class(CgenNode *nd)
+{
   Symbol name = nd->get_name();
-  if (!this->find(name)) {
+  if (!this->find(name))
+  {
     // The class name is legal, so add it to the list of classes
     // and the symbol table.
     nds.push_back(nd);
@@ -255,9 +262,11 @@ void CgenClassTable::install_class(CgenNode *nd) {
 }
 
 // Add this CgenNode to the special class list and the lookup table
-void CgenClassTable::install_special_class(CgenNode *nd) {
+void CgenClassTable::install_special_class(CgenNode *nd)
+{
   Symbol name = nd->get_name();
-  if (!this->find(name)) {
+  if (!this->find(name))
+  {
     // The class name is legal, so add it to the list of special classes
     // and the symbol table.
     special_nds.push_back(nd);
@@ -266,7 +275,8 @@ void CgenClassTable::install_special_class(CgenNode *nd) {
 }
 
 // CgenClassTable::build_inheritance_tree
-void CgenClassTable::build_inheritance_tree() {
+void CgenClassTable::build_inheritance_tree()
+{
   for (auto node : nds)
     set_relations(node);
 }
@@ -275,10 +285,12 @@ void CgenClassTable::build_inheritance_tree() {
 // Takes a CgenNode and locates its, and its parent's, inheritance nodes
 // via the class table. Parent and child pointers are added as appropriate.
 //
-void CgenClassTable::set_relations(CgenNode *nd) {
+void CgenClassTable::set_relations(CgenNode *nd)
+{
   Symbol parent = nd->get_parent();
   auto parent_node = this->find(parent);
-  if (!parent_node) {
+  if (!parent_node)
+  {
     throw std::runtime_error("Class " + nd->get_name()->get_string() +
                              " inherits from an undefined class " +
                              parent->get_string());
@@ -288,7 +300,8 @@ void CgenClassTable::set_relations(CgenNode *nd) {
 
 // Sets up declarations for extra functions needed for code generation
 // You should not need to modify this code for Lab1
-void CgenClassTable::setup_external_functions() {
+void CgenClassTable::setup_external_functions()
+{
   ValuePrinter vp(*ct_stream);
   // setup function: external int strcmp(sbyte*, sbyte*)
   op_type i32_type(INT32), i8ptr_type(INT8_PTR), vararg_type(VAR_ARG);
@@ -318,9 +331,11 @@ void CgenClassTable::setup_external_functions() {
 #endif
 }
 
-void CgenClassTable::setup_classes(CgenNode *c, int depth) {
+void CgenClassTable::setup_classes(CgenNode *c, int depth)
+{
   c->setup(current_tag++, depth);
-  for (auto child : c->get_children()) {
+  for (auto child : c->get_children())
+  {
     setup_classes(child, depth + 1);
   }
   c->set_max_child(current_tag - 1);
@@ -328,14 +343,17 @@ void CgenClassTable::setup_classes(CgenNode *c, int depth) {
 
 // The code generation first pass. Define these two functions to traverse
 // the tree and setup each CgenNode
-void CgenClassTable::setup() {
+void CgenClassTable::setup()
+{
   setup_external_functions();
   setup_classes(root(), 0);
 }
 
 // The code generation second pass. Add code here to traverse the tree and
 // emit code for each CgenNode
-void CgenClassTable::code_module() {
+// TODO: MAIN ENTRY POINT
+void CgenClassTable::code_module()
+{
   code_constants();
 
 #ifndef LAB2
@@ -352,13 +370,15 @@ void CgenClassTable::code_module() {
 }
 
 #ifdef LAB2
-void CgenClassTable::code_classes(CgenNode *c) {
+void CgenClassTable::code_classes(CgenNode *c)
+{
   // TODO: add code here
 }
 #endif
 
 // Create global definitions for constant Cool objects
-void CgenClassTable::code_constants() {
+void CgenClassTable::code_constants()
+{
 #ifdef LAB2
   // TODO: add code here
 #endif
@@ -367,18 +387,14 @@ void CgenClassTable::code_constants() {
 // Create LLVM entry point. This function will initiate our Cool program
 // by generating the code to execute (new Main).main()
 //
-void CgenClassTable::code_main(){
+void CgenClassTable::code_main()
+{
   // TODO: add code here
 
   // Define a function main that has no parameters and returns an i32
-
   std::string mainName = "main";
 
-
-  op_type i1(INT1);
-  op_type i1ptr(INT1_PTR);
-  op_type i1pptr(INT1_PPTR);
-
+  // test op_types
   op_type i8(INT8);
   op_type i8ptr(INT8_PTR);
   op_type i8pptr(INT8_PPTR);
@@ -387,124 +403,126 @@ void CgenClassTable::code_main(){
   op_type i32ptr(INT32_PTR);
   op_type i32pptr(INT32_PPTR);
 
+  op_type emp(EMPTY);
   op_type vd(VOID);
-
   op_type va(VAR_ARG);
 
   op_arr_type i8arr(INT8, 25);
   op_arr_ptr_type i8arrptr(INT8, 25);
   op_arr_type i32arr(INT32_PTR, 1);
 
-
-  ValuePrinter vp(*ct_stream);
-
-  //Test vectors
- 
-  //Testing op_types
-  std::vector<testField> testop_types;
-
-  testop_types.push_back(testField("INT1", &i1));
-  testop_types.push_back(testField("INT1_PTR", &i1ptr));
-  testop_types.push_back(testField("INT1_PPTR", &i1pptr));
-
-  testop_types.push_back(testField("INT8", &i8));
-  testop_types.push_back(testField("INT8_PTR", &i8ptr));
-  testop_types.push_back(testField("INT8_PPTR", &i8pptr));
-  testop_types.push_back(testField("INT8_ARR", &i8arr));
-
-  testop_types.push_back(testField("INT32", &i32));
-  testop_types.push_back(testField("INT32_PTR", &i32ptr));
-  testop_types.push_back(testField("INT32_PPTR", &i32pptr));
-  testop_types.push_back(testField("INT32_ARR", &i32arr));
-
-  testop_types.push_back(testField("VOID", &vd));
-  testop_types.push_back(testField("VAR_ARG", &va));
-
-
-  //Trying op_type subclasses
-  testop_types.push_back(testField("INT8_PTR", &i8arr));
-  testop_types.push_back(testField("INT8_PPTR", &i8arrptr));
-  testop_types.push_back(testField("INT32_PTR", &i32arr));
-
-  //Testing operands
-  std::vector<testField> testops;
-
-
-
-
   std::vector<operand> non;
   std::vector<op_type> null;
 
-  operand nun = operand();
   int_value zero = int_value(0);
-  const_value cv = const_value(i8arrptr, ".str", true);
-  //testops.push_back(testField(&cv));
-  
- 
 
-  //of operand type
+  ValuePrinter vp(*ct_stream);
+
+  /*
+  // test operands
+operand tester = operand(i32, "tester");
+operand nun = operand();
+int_value zero = int_value(0);
+
+// Testing op_types
+std::vector<testField> testop_types;
+
+// Testing operands
+std::vector<testField> testops;
+
+testop_types.push_back(testField("INT1", &i1));
+testop_types.push_back(testField("INT1_PTR", &i1ptr));
+testop_types.push_back(testField("INT1_PPTR", &i1pptr));
+
+testop_types.push_back(testField("INT8", &i8));
+testop_types.push_back(testField("INT8_PTR", &i8ptr));
+testop_types.push_back(testField("INT8_PPTR", &i8pptr));
+testop_types.push_back(testField("INT8_ARR", &i8arr));
+
+testop_types.push_back(testField("INT32", &i32));
+testop_types.push_back(testField("INT32_PTR", &i32ptr));
+testop_types.push_back(testField("INT32_PPTR", &i32pptr));
+testop_types.push_back(testField("INT32_ARR", &i32arr));
+
+testop_types.push_back(testField("VOID", &vd));
+testop_types.push_back(testField("VAR_ARG", &va));
+testop_types.push_back(testField("EMPTY", &emp));
+
+// Trying op_type subclasses
+testop_types.push_back(testField("INT8_PTR", &i8arr));
+testop_types.push_back(testField("INT8_ARRPTR", &i8arrptr));
+testop_types.push_back(testField("INT32_PTR", &i32arr));
+
+testops.push_back(testField(&cv));
+
+testops.push_back(testField(&str)); // Adding str to test vector
+*/
+
+  global_value cv = global_value(i8arrptr, ".str");
+
+  // of operand type
   const_value str = const_value(i8arr, "Main_main() returned %d\n", true);
   vp.init_constant(".str", str);
-  
   vp.define(i32, "main", non);
 
-    // Define an entry basic block
+  // Define an entry basic block
   vp.begin_block("entry");
 
   // Call Main_main(). This returns int for phase 1, Object for phase 2
-  //operand return call
-  operand ret = vp.call(null, i32, "Main_main", true, non);  
+  operand ret = vp.call(null, i32, "Main_main", true, non);
 
-  #ifdef LAB2
-  // LAB2
-  #else
+#ifdef LAB2
+// LAB2
+#else
   // Lab1
-  // Get the address of the string "Main_main() returned %d\n" using
-  // getelementptr
+  // Get the address of the string "Main_main() returned %d\n" using "getelementptr"
   operand arg1 = vp.getelementptr(i8arr, cv, zero, zero, i8ptr);
   // Call printf with the string address of "Main_main() returned %d\n"
   // and the return value of Main_main() as its arguments
   std::vector<op_type> argTypes;
   argTypes.push_back(i8ptr);
-  argTypes.push_back(va);
 
   std::vector<operand> args;
   args.push_back(arg1);
   args.push_back(ret);
 
-  vp.call(argTypes, i32, "printf", true, args);
+  vp.call_variadic(argTypes, i32, "printf", true, args);
 
   // Insert return 0
   vp.ret(zero);
   vp.end_define();
 
-  value_printer_tester(vp, testops, testop_types);
-  
-  #endif
+  // value_printer_tester(vp, testops, testop_types);
+
+#endif
 }
 
-//function to test Value_printer functions
-void value_printer_tester(ValuePrinter vp, std::vector<testField> operandsToTest, std::vector<testField> op_typesToTest){
+// function to test Value_printer functions
+void value_printer_tester(ValuePrinter vp, std::vector<testField> operandsToTest, std::vector<testField> op_typesToTest)
+{
   using namespace std;
-  cerr<<"===============================================";
-  cerr<<"\n\nTesting:\n\n";
-  
+  cerr << "\n===============================================\n";
   cerr << "op_types IR return:\n\n";
-  for (auto op_typeTest = op_typesToTest.begin(); op_typeTest != op_typesToTest.end(); ++op_typeTest){
-      cerr << *op_typeTest << std::endl;
+  for (auto op_typeTest = op_typesToTest.begin(); op_typeTest != op_typesToTest.end(); ++op_typeTest)
+  {
+    cerr << *op_typeTest << std::endl;
   }
 
-  cerr << "\nOperands to Test:\n\n";
-  for (auto opers = operandsToTest.begin(); opers != operandsToTest.end(); ++opers){
+  cerr << "===============================================\n";
+  cerr << "Operands to Test:\n\n";
+  for (auto opers = operandsToTest.begin(); opers != operandsToTest.end(); ++opers)
+  {
     cerr << *opers << std::endl;
   }
-  cerr<<"===============================================\n";
+  cerr << "===============================================\n";
 }
 
 // Get the root of the class tree.
-CgenNode *CgenClassTable::root() {
+CgenNode *CgenClassTable::root()
+{
   auto root = this->find(Object);
-  if (!root) {
+  if (!root)
+  {
     throw std::runtime_error("Class Object is not defined.");
   }
   return root;
@@ -513,10 +531,12 @@ CgenNode *CgenClassTable::root() {
 #ifndef LAB2
 // Special-case functions used for the method Int Main::main() for
 // Lab1 only.
-CgenNode *CgenClassTable::getMainmain(CgenNode *c) {
+CgenNode *CgenClassTable::getMainmain(CgenNode *c)
+{
   if (c && !c->basic())
     return c; // Found it!
-  for (auto child : c->get_children()) {
+  for (auto child : c->get_children())
+  {
     if (CgenNode *foundMain = this->getMainmain(child))
       return foundMain; // Propagate it up the recursive calls
   }
@@ -547,14 +567,17 @@ CgenNode *CgenClassTable::getMainmain(CgenNode *c) {
 *********************************************************************/
 
 // Create definitions for all String constants
-void StrTable::code_string_table(std::ostream &s, CgenClassTable *ct) {
-  for (auto &[_, entry] : this->_table) {
+void StrTable::code_string_table(std::ostream &s, CgenClassTable *ct)
+{
+  for (auto &[_, entry] : this->_table)
+  {
     entry.code_def(s, ct);
   }
 }
 
 // generate code to define a global string constant
-void StringEntry::code_def(std::ostream &s, CgenClassTable *ct) {
+void StringEntry::code_def(std::ostream &s, CgenClassTable *ct)
+{
 #ifdef LAB2
   // TODO: add code here
 #endif
@@ -576,7 +599,8 @@ void StringEntry::code_def(std::ostream &s, CgenClassTable *ct) {
 //  - create the types for the class and its vtable
 //  - create global definitions used by the class such as the class vtable
 //
-void CgenNode::setup(int tag, int depth) {
+void CgenNode::setup(int tag, int depth)
+{
   this->tag = tag;
 #ifdef LAB2
   layout_features();
@@ -589,28 +613,33 @@ void CgenNode::setup(int tag, int depth) {
 #ifdef LAB2
 // Laying out the features involves creating a Function for each method
 // and assigning each attribute a slot in the class structure.
-void CgenNode::layout_features() {
+void CgenNode::layout_features()
+{
   // TODO: add code here
 }
 
 // Class codegen. This should performed after every class has been setup.
 // Generate code for each method of the class.
-void CgenNode::code_class() {
+void CgenNode::code_class()
+{
   // No code generation for basic classes. The runtime will handle that.
-  if (basic()) {
+  if (basic())
+  {
     return;
   }
   // TODO: add code here
 }
 
-void CgenNode::code_init_function(CgenEnvironment *env) {
+void CgenNode::code_init_function(CgenEnvironment *env)
+{
   // TODO: add code here
 }
 
 #else
 
 // code-gen function main() in class Main
-void CgenNode::codeGenMainmain() {
+void CgenNode::codeGenMainmain()
+{
   // In Phase 1, this can only be class Main. Get method_class for main().
   assert(std::string(this->name->get_string()) == std::string("Main"));
   method_class *mainMethod = (method_class *)features->nth(features->first());
@@ -620,7 +649,6 @@ void CgenNode::codeGenMainmain() {
   // -- setup or create the environment, env, for translating this method
   // -- invoke mainMethod->code(env) to translate the method
 
-  
   /*
     class__class(Symbol a1, Symbol a2, Features a3, Symbol a4) {
     name = a1;
@@ -629,24 +657,23 @@ void CgenNode::codeGenMainmain() {
     filename = a4;
   }
   */
-  Symbol name = new StringEntry("Main", 0);
-  Symbol nothing = new StringEntry();
-  Features none = single_Features(mainMethod->copy_Feature());
-  Symbol fileName = new StringEntry("test.cl", 0);
-  Class_ BigMain = class_(name, nothing, none, fileName);
+  /*
+   Symbol name = new StringEntry("Main", 0);
+   Symbol nothing = new StringEntry();
+   Features none = single_Features(mainMethod->copy_Feature());
+   Symbol fileName = new StringEntry("test.cl", 0);
+   Class_ BigMain = class_(name, nothing, none, fileName);
+   */
 
+  // CgenClassTable* startTable = new CgenClassTable(myClasses, *ct_stream);
 
-  //CgenClassTable* startTable = new CgenClassTable(myClasses, *ct_stream);
+  // CgenNode(Class_ c, Basicness bstatus, CgenClassTable *class_table)
+  // CgenNode *start = new CgenNode(BigMain, Basic, class_table);
 
+  // CgenEnvironment(std::ostream &stream, CgenNode *cur_class)
+  CgenEnvironment env = CgenEnvironment(*ct_stream, this);
 
-  //CgenNode(Class_ c, Basicness bstatus, CgenClassTable *class_table)
-  CgenNode* start = new CgenNode(BigMain, Basic, class_table);
-
-
-  //CgenEnvironment(std::ostream &stream, CgenNode *cur_class)
-  CgenEnvironment env = CgenEnvironment(*ct_stream, start);
-  
-  mainMethod -> code(&env);
+  mainMethod->code(&env);
 }
 
 #endif
@@ -658,7 +685,8 @@ void CgenNode::codeGenMainmain() {
 *********************************************************************/
 
 // Look up a CgenNode given a symbol
-CgenNode *CgenEnvironment::type_to_class(Symbol t) {
+CgenNode *CgenEnvironment::type_to_class(Symbol t)
+{
   return t == SELF_TYPE ? get_class()
                         : get_class()->get_classtable()->find_in_scopes(t);
 }
@@ -674,33 +702,59 @@ CgenNode *CgenEnvironment::type_to_class(Symbol t) {
 
 *********************************************************************/
 
-void program_class::cgen(const std::optional<std::string> &outfile) {
+void program_class::cgen(const std::optional<std::string> &outfile)
+{
   initialize_constants();
-  if (outfile) {
+  if (outfile)
+  {
     std::ofstream s(*outfile);
-    if (!s.good()) {
+    if (!s.good())
+    {
       std::cerr << "Cannot open output file " << *outfile << std::endl;
       exit(1);
     }
     class_table = new CgenClassTable(classes, s);
-  } else {
+  }
+  else
+  {
     class_table = new CgenClassTable(classes, std::cout);
   }
 }
 
 // Create a method body
-void method_class::code(CgenEnvironment *env) {
-  if (cgen_debug) {
+void method_class::code(CgenEnvironment *env)
+{
+  if (cgen_debug)
+  {
     std::cerr << "method" << std::endl;
   }
 
   ValuePrinter vp(*env->cur_stream);
   // TODO: add code here
+
+  std::vector<operand> null;
+  vp.define(op_type(INT32), "Main_main", null);
+
+  vp.begin_block(name->get_string());
+
+  // code() called with method's expression
+  operand finalExpression = expr->code(env);
+  vp.ret(finalExpression);
+
+  // vp.ret(int_value(0)); // Temporary
+  vp.end_define();
+}
+
+void code_helper()
+{
+  // use this for method_class::code() in future labs
+  // recurse through the tree here and call based on cgen node type
 }
 
 // Codegen for expressions. Note that each expression has a value.
 
-operand assign_class::code(CgenEnvironment *env) {
+operand assign_class::code(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "assign" << std::endl;
 
@@ -709,15 +763,18 @@ operand assign_class::code(CgenEnvironment *env) {
   return operand();
 }
 
-operand cond_class::code(CgenEnvironment *env) {
+operand cond_class::code(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "cond" << std::endl;
 
   // TODO: add code here and replace `return operand()`
+
   return operand();
 }
 
-operand loop_class::code(CgenEnvironment *env) {
+operand loop_class::code(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "loop" << std::endl;
 
@@ -725,15 +782,25 @@ operand loop_class::code(CgenEnvironment *env) {
   return operand();
 }
 
-operand block_class::code(CgenEnvironment *env) {
+operand block_class::code(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "block" << std::endl;
 
-  // TODO: add code here and replace `return operand()`
-  return operand();
+  // create a block_class operand iterate through Expressions field and call respective code funcs
+  // save last expression to serve as return for block
+  operand lastExpression;
+  for (int i = body->first(); body->more(i); i = body->next(i))
+  {
+    // std::cerr << body->nth(i)->get_line_number() << std::endl;
+    lastExpression = body->nth(i)->code(env);
+  }
+
+  return lastExpression;
 }
 
-operand let_class::code(CgenEnvironment *env) {
+operand let_class::code(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "let" << std::endl;
 
@@ -741,95 +808,132 @@ operand let_class::code(CgenEnvironment *env) {
   return operand();
 }
 
-operand plus_class::code(CgenEnvironment *env) {
+operand plus_class::code(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "plus" << std::endl;
 
-  // TODO: add code here and replace `return operand()`
-  return operand();
+  ValuePrinter vp(*env->cur_stream);
+  return vp.add(e1->code(env), e2->code(env));
 }
 
-operand sub_class::code(CgenEnvironment *env) {
+operand sub_class::code(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "sub" << std::endl;
 
-  // TODO: add code here and replace `return operand()`
-  return operand();
+  ValuePrinter vp(*env->cur_stream);
+  return vp.sub(e1->code(env), e2->code(env));
 }
 
-operand mul_class::code(CgenEnvironment *env) {
+operand mul_class::code(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "mul" << std::endl;
 
-  // TODO: add code here and replace `return operand()`
-  return operand();
+  ValuePrinter vp(*env->cur_stream);
+  return vp.mul(e1->code(env), e2->code(env));
 }
 
-operand divide_class::code(CgenEnvironment *env) {
+operand divide_class::code(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "div" << std::endl;
 
-  // TODO: add code here and replace `return operand()`
-  return operand();
+  ValuePrinter vp(*env->cur_stream);
+  return vp.div(e1->code(env), e2->code(env));
 }
 
-operand neg_class::code(CgenEnvironment *env) {
+operand neg_class::code(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "neg" << std::endl;
 
-  // TODO: add code here and replace `return operand()`
-  return operand();
+  // only ever fed INT type (LAB1)
+  ValuePrinter vp(*env->cur_stream);
+  // resolve to operand-> get value and inverse-> return int const
+  // could "simplify"; harder to read
+  operand hold = e1->code(env);
+  int inv = std::stoi(hold.get_name()) * -1;
+  return int_value(inv);
 }
 
-operand lt_class::code(CgenEnvironment *env) {
+operand lt_class::code(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "lt" << std::endl;
 
-  // TODO: add code here and replace `return operand()`
-  return operand();
+  ValuePrinter vp(*env->cur_stream);
+
+  return vp.icmp(LT, e1->code(env), e2->code(env));
 }
 
-operand eq_class::code(CgenEnvironment *env) {
+operand eq_class::code(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "eq" << std::endl;
 
-  // TODO: add code here and replace `return operand()`
-  return operand();
+  ValuePrinter vp(*env->cur_stream);
+
+  return vp.icmp(EQ, e1->code(env), e2->code(env));
 }
 
-operand leq_class::code(CgenEnvironment *env) {
+operand leq_class::code(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "leq" << std::endl;
 
-  // TODO: add code here and replace `return operand()`
-  return operand();
+  ValuePrinter vp(*env->cur_stream);
+
+  return vp.icmp(LE, e1->code(env), e2->code(env));
 }
 
-operand comp_class::code(CgenEnvironment *env) {
+operand comp_class::code(CgenEnvironment *env)
+{
   if (cgen_debug)
+  {
     std::cerr << "complement" << std::endl;
+    std::cerr << e1->code(env).get_name() << " : init bool" << std::endl;
+  }
 
-  // TODO: add code here and replace `return operand()`
-  return operand();
+  // Should bools be internal??
+
+  // only ever fed bool (Lab 1)
+  operand hold = e1->code(env);
+  if (hold.get_name() == "true")
+  {
+    // if true, return false const
+    return bool_value(false, true);
+  }
+
+  // if false, return true const
+  return bool_value(true, true);
 }
 
-operand int_const_class::code(CgenEnvironment *env) {
+operand int_const_class::code(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "Integer Constant" << std::endl;
 
-  // TODO: add code here and replace `return operand()`
-  return operand();
+  ValuePrinter vp(*env->cur_stream);
+
+  int_value intConst = int_value(std::stoi(token->get_string()));
+  return intConst;
 }
 
-operand bool_const_class::code(CgenEnvironment *env) {
+operand bool_const_class::code(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "Boolean Constant" << std::endl;
 
-  // TODO: add code here and replace `return operand()`
-  return operand();
+  ValuePrinter vp(*env->cur_stream);
+
+  bool_value boolConst = bool_value(val, true);
+  return boolConst;
 }
 
-operand object_class::code(CgenEnvironment *env) {
+operand object_class::code(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "Object" << std::endl;
 
@@ -837,7 +941,8 @@ operand object_class::code(CgenEnvironment *env) {
   return operand();
 }
 
-operand no_expr_class::code(CgenEnvironment *env) {
+operand no_expr_class::code(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "No_expr" << std::endl;
 
@@ -851,7 +956,8 @@ operand no_expr_class::code(CgenEnvironment *env) {
 // methods via the Expression_SHARED_EXTRAS hack.
 //*****************************************************************
 
-operand static_dispatch_class::code(CgenEnvironment *env) {
+operand static_dispatch_class::code(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "static dispatch" << std::endl;
 #ifndef LAB2
@@ -862,7 +968,8 @@ operand static_dispatch_class::code(CgenEnvironment *env) {
 #endif
 }
 
-operand string_const_class::code(CgenEnvironment *env) {
+operand string_const_class::code(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "string_const" << std::endl;
 #ifndef LAB2
@@ -873,7 +980,8 @@ operand string_const_class::code(CgenEnvironment *env) {
 #endif
 }
 
-operand dispatch_class::code(CgenEnvironment *env) {
+operand dispatch_class::code(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "dispatch" << std::endl;
 #ifndef LAB2
@@ -885,7 +993,8 @@ operand dispatch_class::code(CgenEnvironment *env) {
 }
 
 // Handle a Cool case expression (selecting based on the type of an object)
-operand typcase_class::code(CgenEnvironment *env) {
+operand typcase_class::code(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "typecase::code()" << std::endl;
 #ifndef LAB2
@@ -896,7 +1005,8 @@ operand typcase_class::code(CgenEnvironment *env) {
 #endif
 }
 
-operand new__class::code(CgenEnvironment *env) {
+operand new__class::code(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "newClass" << std::endl;
 #ifndef LAB2
@@ -907,7 +1017,8 @@ operand new__class::code(CgenEnvironment *env) {
 #endif
 }
 
-operand isvoid_class::code(CgenEnvironment *env) {
+operand isvoid_class::code(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "isvoid" << std::endl;
 #ifndef LAB2
@@ -919,7 +1030,8 @@ operand isvoid_class::code(CgenEnvironment *env) {
 }
 
 // Create the LLVM Function corresponding to this method.
-void method_class::layout_feature(CgenNode *cls) {
+void method_class::layout_feature(CgenNode *cls)
+{
 #ifndef LAB2
   assert(0 && "Unsupported case for phase 1");
 #else
@@ -933,7 +1045,8 @@ void method_class::layout_feature(CgenNode *cls) {
 // then the branch is a superclass of the source.
 // See the LAB2 handout for more information about our use of class tags.
 operand branch_class::code(operand expr_val, operand tag, op_type join_type,
-                           CgenEnvironment *env) {
+                           CgenEnvironment *env)
+{
 #ifndef LAB2
   assert(0 && "Unsupported case for phase 1");
 #else
@@ -943,7 +1056,8 @@ operand branch_class::code(operand expr_val, operand tag, op_type join_type,
 }
 
 // Assign this attribute a slot in the class structure
-void attr_class::layout_feature(CgenNode *cls) {
+void attr_class::layout_feature(CgenNode *cls)
+{
 #ifndef LAB2
   assert(0 && "Unsupported case for phase 1");
 #else
@@ -951,7 +1065,8 @@ void attr_class::layout_feature(CgenNode *cls) {
 #endif
 }
 
-void attr_class::code(CgenEnvironment *env) {
+void attr_class::code(CgenEnvironment *env)
+{
 #ifndef LAB2
   assert(0 && "Unsupported case for phase 1");
 #else
@@ -962,133 +1077,152 @@ void attr_class::code(CgenEnvironment *env) {
 /*
  * Definitions of make_alloca
  */
-void assign_class::make_alloca(CgenEnvironment *env) {
+void assign_class::make_alloca(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "assign" << std::endl;
 
   // TODO: add code here
 }
 
-void cond_class::make_alloca(CgenEnvironment *env) {
+void cond_class::make_alloca(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "cond" << std::endl;
 
   // TODO: add code here
 }
 
-void loop_class::make_alloca(CgenEnvironment *env) {
+void loop_class::make_alloca(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "loop" << std::endl;
 
   // TODO: add code here
 }
 
-void block_class::make_alloca(CgenEnvironment *env) {
+void block_class::make_alloca(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "block" << std::endl;
 
   // TODO: add code here
 }
 
-void let_class::make_alloca(CgenEnvironment *env) {
+void let_class::make_alloca(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "let" << std::endl;
 
   // TODO: add code here
 }
 
-void plus_class::make_alloca(CgenEnvironment *env) {
+void plus_class::make_alloca(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "plus" << std::endl;
 
   // TODO: add code here
 }
 
-void sub_class::make_alloca(CgenEnvironment *env) {
+void sub_class::make_alloca(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "sub" << std::endl;
 
   // TODO: add code here
 }
 
-void mul_class::make_alloca(CgenEnvironment *env) {
+void mul_class::make_alloca(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "mul" << std::endl;
 
   // TODO: add code here
 }
 
-void divide_class::make_alloca(CgenEnvironment *env) {
+void divide_class::make_alloca(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "div" << std::endl;
 
   // TODO: add code here
 }
 
-void neg_class::make_alloca(CgenEnvironment *env) {
+void neg_class::make_alloca(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "neg" << std::endl;
 
   // TODO: add code here
 }
 
-void lt_class::make_alloca(CgenEnvironment *env) {
+void lt_class::make_alloca(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "lt" << std::endl;
 
   // TODO: add code here
 }
 
-void eq_class::make_alloca(CgenEnvironment *env) {
+void eq_class::make_alloca(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "eq" << std::endl;
 
   // TODO: add code here
 }
 
-void leq_class::make_alloca(CgenEnvironment *env) {
+void leq_class::make_alloca(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "leq" << std::endl;
 
   // TODO: add code here
 }
 
-void comp_class::make_alloca(CgenEnvironment *env) {
+void comp_class::make_alloca(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "complement" << std::endl;
 
   // TODO: add code here
 }
 
-void int_const_class::make_alloca(CgenEnvironment *env) {
+void int_const_class::make_alloca(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "Integer Constant" << std::endl;
 
   // TODO: add code here
 }
 
-void bool_const_class::make_alloca(CgenEnvironment *env) {
+void bool_const_class::make_alloca(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "Boolean Constant" << std::endl;
 
   // TODO: add code here
 }
 
-void object_class::make_alloca(CgenEnvironment *env) {
+void object_class::make_alloca(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "Object" << std::endl;
 
   // TODO: add code here
 }
 
-void no_expr_class::make_alloca(CgenEnvironment *env) {
+void no_expr_class::make_alloca(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "No_expr" << std::endl;
 
   // TODO: add code here
 }
 
-void static_dispatch_class::make_alloca(CgenEnvironment *env) {
+void static_dispatch_class::make_alloca(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "static dispatch" << std::endl;
 #ifndef LAB2
@@ -1098,7 +1232,8 @@ void static_dispatch_class::make_alloca(CgenEnvironment *env) {
 #endif
 }
 
-void string_const_class::make_alloca(CgenEnvironment *env) {
+void string_const_class::make_alloca(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "string_const" << std::endl;
 #ifndef LAB2
@@ -1108,7 +1243,8 @@ void string_const_class::make_alloca(CgenEnvironment *env) {
 #endif
 }
 
-void dispatch_class::make_alloca(CgenEnvironment *env) {
+void dispatch_class::make_alloca(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "dispatch" << std::endl;
 #ifndef LAB2
@@ -1118,7 +1254,8 @@ void dispatch_class::make_alloca(CgenEnvironment *env) {
 #endif
 }
 
-void typcase_class::make_alloca(CgenEnvironment *env) {
+void typcase_class::make_alloca(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "typecase::make_alloca()" << std::endl;
 #ifndef LAB2
@@ -1128,7 +1265,8 @@ void typcase_class::make_alloca(CgenEnvironment *env) {
 #endif
 }
 
-void new__class::make_alloca(CgenEnvironment *env) {
+void new__class::make_alloca(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "newClass" << std::endl;
 #ifndef LAB2
@@ -1138,7 +1276,8 @@ void new__class::make_alloca(CgenEnvironment *env) {
 #endif
 }
 
-void isvoid_class::make_alloca(CgenEnvironment *env) {
+void isvoid_class::make_alloca(CgenEnvironment *env)
+{
   if (cgen_debug)
     std::cerr << "isvoid" << std::endl;
 #ifndef LAB2
@@ -1148,7 +1287,8 @@ void isvoid_class::make_alloca(CgenEnvironment *env) {
 #endif
 }
 
-void branch_class::make_alloca(CgenEnvironment *env) {
+void branch_class::make_alloca(CgenEnvironment *env)
+{
 #ifndef LAB2
   assert(0 && "Unsupported case for phase 1");
 #else
@@ -1158,7 +1298,8 @@ void branch_class::make_alloca(CgenEnvironment *env) {
 
 void method_class::make_alloca(CgenEnvironment *env) { return; }
 
-void attr_class::make_alloca(CgenEnvironment *env) {
+void attr_class::make_alloca(CgenEnvironment *env)
+{
 #ifndef LAB2
   assert(0 && "Unsupported case for phase 1");
 #else
@@ -1172,7 +1313,8 @@ void attr_class::make_alloca(CgenEnvironment *env) {
 // is known to be (dynamically) compatible with the target type.
 // It should only be called when this condition holds.
 // (It's needed by the supplied code for typecase)
-operand conform(operand src, op_type type, CgenEnvironment *env) {
+operand conform(operand src, op_type type, CgenEnvironment *env)
+{
   // TODO: add code here
   return operand();
 }
