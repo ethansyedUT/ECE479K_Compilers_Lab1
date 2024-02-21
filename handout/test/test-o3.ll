@@ -8,14 +8,14 @@ declare noundef i32 @printf(i8* nocapture noundef readonly, ...) local_unnamed_a
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind readnone willreturn
 define i32 @Main_main() local_unnamed_addr #1 {
-main:
-  ret i32 0
+entry:
+  ret i32 10
 }
 
 ; Function Attrs: nofree nounwind
 define i32 @main() local_unnamed_addr #0 {
 entry:
-  %vtpm.2 = tail call i32 (i8*, ...) @printf(i8* nonnull dereferenceable(1) getelementptr inbounds ([25 x i8], [25 x i8]* @.str, i64 0, i64 0), i32 0)
+  %vtpm.2 = tail call i32 (i8*, ...) @printf(i8* nonnull dereferenceable(1) getelementptr inbounds ([25 x i8], [25 x i8]* @.str, i64 0, i64 0), i32 10)
   ret i32 0
 }
 

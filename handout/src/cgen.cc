@@ -848,8 +848,36 @@ operand loop_class::code(CgenEnvironment *env)
   if (cgen_debug)
     std::cerr << "loop" << std::endl;
 
-  // TODO: add code here and replace `return operand()`
-  return operand();
+  // gaming time
+
+  // resolve the predicate
+  // if true ; resolve body
+  // else ; terminate
+  ValuePrinter vp(*env->cur_stream);
+  // more basic blocks
+
+  // should always be true or false
+  // QUESTION: Do I have to type check here? (LAB 2 probably)
+  // std::cerr << "LOOP IDENTIFIER : " << predResult.get_type().is_bool_object() << std::endl;
+
+  std::string loopName = env->new_label("loop", false);
+  std::string bodyName = env->new_label("body", false);
+  std::string exit = env->new_label("exit", true);
+  // emit IR to move prog to first loop block
+  vp.branch_uncond(loopName);
+
+  vp.begin_block(loopName);
+  operand predResult = pred->code(env);
+  vp.branch_cond(predResult, bodyName, exit);
+
+  vp.begin_block(bodyName);
+  body->code(env);
+  vp.branch_uncond(loopName);
+
+  vp.begin_block(exit);
+
+  // loop should return int 0 (LAB 1)
+  return int_value(0);
 }
 
 operand block_class::code(CgenEnvironment *env)
@@ -959,7 +987,17 @@ operand divide_class::code(CgenEnvironment *env)
     std::cerr << "div" << std::endl;
 
   ValuePrinter vp(*env->cur_stream);
-  return vp.div(e1->code(env), e2->code(env));
+
+  // divide by 0 check
+  operand divResult = e2->code(env);
+  if (divResult.get_name() == "0")
+  {
+    std::vector<op_type> empty;
+    std::vector<operand> nun;
+    vp.call(empty, op_type(VOID), "abort", true, nun);
+  }
+
+  return vp.div(e1->code(env), divResult);
 }
 
 operand neg_class::code(CgenEnvironment *env)
@@ -1055,8 +1093,19 @@ operand object_class::code(CgenEnvironment *env)
   if (cgen_debug)
     std::cerr << "Object" << std::endl;
 
-  // TODO: add code here and replace `return operand()`
-  return operand();
+  // TODO: Do checks later to see if acesses are found within scope
+  // In future add more object checks here (ptrs, strings, custom objs)
+
+  // check label of object
+  // look in symbol table
+  // load value
+  //  return correct operand / value
+  ValuePrinter vp(*env->cur_stream);
+
+  operand op = *env->find_in_scopes(name);
+  operand ld = vp.load(op.get_type().get_deref_type(), op);
+
+  return ld;
 }
 
 operand no_expr_class::code(CgenEnvironment *env)

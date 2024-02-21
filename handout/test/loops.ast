@@ -1,18 +1,18 @@
-#8
+#10
 _program
-  #8
+  #10
   _class
     Main
     Object
-    "let.cl"
+    "loops.cl"
     (
-    #7
+    #9
     _method
       main
       Int
-      #7
+      #9
       _block
-        #6
+        #7
         _let
           x
           Int
@@ -20,27 +20,31 @@ _program
           _no_expr
           : _no_type
           #6
-          _let
-            y
-            Bool
-            #3
-            _bool
-              1
-            : Bool
-            #6
-            _let
-              x
-              Int
+          _loop
+            #4
+            _lt
+              #4
+              _object
+                x
+              : Int
               #4
               _int
-                2
+                10
               : Int
+            : Bool
+            #6
+            _assign
+              x
               #5
               _int
-                2
+                10
               : Int
             : Int
-          : Int
+          : Object
+        : Object
+        #8
+        _int
+          0
         : Int
       : Int
     )

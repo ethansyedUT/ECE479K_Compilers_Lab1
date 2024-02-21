@@ -4,8 +4,8 @@ declare void @abort()
 declare i8* @malloc(i32)
 define i32 @Main_main() {
 
-main:
-	ret i32 0
+entry:
+	ret i32 10
 }
 
 @.str = internal constant [25 x i8] c"Main_main() returned %d\0A\00"
