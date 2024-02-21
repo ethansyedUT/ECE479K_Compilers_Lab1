@@ -461,7 +461,7 @@ testops.push_back(testField(&str)); // Adding str to test vector
   global_value cv = global_value(i8arrptr, ".str");
 
   // of operand type
-  const_value str = const_value(i8arr, "Main_main() returned %d\n", true);
+  const_value str = const_value(i8arr, "Main.main() returned %d\n", true);
   vp.init_constant(".str", str);
   vp.define(i32, "main", non);
 

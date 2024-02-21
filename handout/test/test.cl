@@ -1,5 +1,5 @@
 class Main {
     main() : Int {
-        10
+        10/0
     };
 };

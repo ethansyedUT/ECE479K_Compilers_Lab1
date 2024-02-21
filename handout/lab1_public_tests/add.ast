@@ -4,21 +4,21 @@ _program
   _class
     Main
     Object
-    "test.cl"
+    "add.cl"
     (
     #4
     _method
       main
       Int
       #4
-      _divide
+      _plus
         #3
         _int
-          10
+          1
         : Int
         #3
         _int
-          0
+          2
         : Int
       : Int
     )

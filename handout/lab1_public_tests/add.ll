@@ -5,18 +5,17 @@ declare i8* @malloc(i32)
 define i32 @Main_main() {
 
 entry:
-	call void @abort(  )
-	%vtpm.1 = sdiv i32 10, 0
-	ret i32 %vtpm.1
+	%vtpm.0 = add i32 1, 2
+	ret i32 %vtpm.0
 }
 
 @.str = internal constant [25 x i8] c"Main.main() returned %d\0A\00"
 define i32 @main() {
 
 entry:
-	%vtpm.2 = call i32 @Main_main(  )
-	%vtpm.3 = getelementptr [25 x i8], [25 x i8]* @.str, i32 0, i32 0
-	%vtpm.4 = call i32(i8*, ... ) @printf( i8* %vtpm.3, i32 %vtpm.2 )
+	%vtpm.1 = call i32 @Main_main(  )
+	%vtpm.2 = getelementptr [25 x i8], [25 x i8]* @.str, i32 0, i32 0
+	%vtpm.3 = call i32(i8*, ... ) @printf( i8* %vtpm.2, i32 %vtpm.1 )
 	ret i32 0
 }
 
