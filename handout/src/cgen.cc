@@ -845,6 +845,7 @@ operand let_class::code(CgenEnvironment *env)
 
   // very suboptimal
   // ask TA or Dr.Erez how to optimize
+  //======================
   // resolve expr
   // if no_expr assign defaults
   operand value = init->code(env);
@@ -852,12 +853,14 @@ operand let_class::code(CgenEnvironment *env)
   {
     // if no_expr, assign default vals based on type
     if (type_decl->get_string() == "Int")
+      // value = vp.getelementptr(op_type(INT32), opToStore, int_value(0), op_type(INT32));
       value = int_value(0);
     else if (type_decl->get_string() == "Bool")
+      // value = vp.getelementptr(op_type(INT1), opToStore, bool_value(false, true), op_type(INT1));
       value = bool_value(false, true);
   }
 
-  vp.store(opToStore, value);
+  vp.store(value, opToStore);
 
   // add binding to symbol table
   // QUESTION: Am I creating bindings correctly??

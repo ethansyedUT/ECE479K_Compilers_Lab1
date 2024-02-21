@@ -6,11 +6,11 @@ define i32 @Main_main() {
 
 main:
 	%vtpm.0 = alloca i32
-	store i32* %vtpm.0, i32 2
+	store i32 0, i32* %vtpm.0
 	%vtpm.1 = alloca i1
-	store i1* %vtpm.1, i1 false
+	store i1 true, i1* %vtpm.1
 	%vtpm.2 = alloca i32
-	store i32* %vtpm.2, i32 0
+	store i32 2, i32* %vtpm.2
 	ret i32 2
 }
 

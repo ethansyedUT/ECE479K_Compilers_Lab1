@@ -17,23 +17,24 @@ _program
           x
           Int
           #3
-          _int
-            2
-          : Int
+          _no_expr
+          : _no_type
           #6
           _let
             y
             Bool
             #3
-            _no_expr
-            : _no_type
+            _bool
+              1
+            : Bool
             #6
             _let
               x
               Int
               #4
-              _no_expr
-              : _no_type
+              _int
+                2
+              : Int
               #5
               _int
                 2
