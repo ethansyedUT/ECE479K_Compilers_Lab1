@@ -760,17 +760,35 @@ operand assign_class::code(CgenEnvironment *env)
 
   ValuePrinter vp(*env->cur_stream);
   // TODO: add code here and replace `return operand()`
+  // gaming time
+
   return operand();
 }
 
 operand cond_class::code(CgenEnvironment *env)
 {
   if (cgen_debug)
+  {
     std::cerr << "cond" << std::endl;
+    std::cerr << "IDENTIFIER: " << pred->code(env).get_name() << std::endl;
+  }
+  // TODO : COME BACK AFTER ADRESSING KNOWLEDGE GAP
 
-  // TODO: add code here and replace `return operand()`
+  // resolve predicate
+  // if predicate
+  // then resolve then_exp
+  // else resolve else_exp
 
-  return operand();
+  // BAD RESOLVE
+  // It could resolve to a temp reg which will be named %vtpm.x
+  if (pred->code(env).get_name() == "true")
+  {
+    return then_exp->code(env);
+  }
+  else
+  {
+    return else_exp->code(env);
+  }
 }
 
 operand loop_class::code(CgenEnvironment *env)
@@ -804,8 +822,55 @@ operand let_class::code(CgenEnvironment *env)
   if (cgen_debug)
     std::cerr << "let" << std::endl;
 
-  // TODO: add code here and replace `return operand()`
-  return operand();
+  // TODO: Test more thoroughly / particularly add_bindings may be incorrect
+
+  // resolve all expressions / do assignments
+  ValuePrinter vp(*env->cur_stream);
+
+  // open scope
+  env->open_scope();
+
+  operand opToStore;
+  // check type Int or Bool
+  // allocate space for expr
+  // might be bypassing call to int_alloca & bool_alloca
+  if (type_decl->get_string() == "Int")
+  {
+    opToStore = vp.alloca_mem(op_type(INT32));
+  }
+  else if (type_decl->get_string() == "Bool")
+  {
+    opToStore = vp.alloca_mem(op_type(INT1));
+  }
+
+  // very suboptimal
+  // ask TA or Dr.Erez how to optimize
+  // resolve expr
+  // if no_expr assign defaults
+  operand value = init->code(env);
+  if (value.is_empty())
+  {
+    // if no_expr, assign default vals based on type
+    if (type_decl->get_string() == "Int")
+      value = int_value(0);
+    else if (type_decl->get_string() == "Bool")
+      value = bool_value(false, true);
+  }
+
+  vp.store(opToStore, value);
+
+  // add binding to symbol table
+  // QUESTION: Am I creating bindings correctly??
+  env->add_binding(identifier, &opToStore);
+
+  // generate ir for body and store last known result
+  operand ret = body->code(env);
+
+  // close scope
+  env->close_scope();
+
+  // return result of body expr
+  return ret;
 }
 
 operand plus_class::code(CgenEnvironment *env)
@@ -1192,9 +1257,17 @@ void comp_class::make_alloca(CgenEnvironment *env)
 void int_const_class::make_alloca(CgenEnvironment *env)
 {
   if (cgen_debug)
-    std::cerr << "Integer Constant" << std::endl;
+  {
+    std::cerr << "Integer Constant Alloca" << std::endl;
+    std::cerr << "Token Name : " << token->get_string() << std::endl;
+  }
 
-  // TODO: add code here
+  // TODO: add code here THIS IS BAD???
+  ValuePrinter vp(*env->cur_stream);
+
+  operand hold = vp.alloca_mem(op_type(INT32));
+  env->add_binding(token, &hold);
+  return;
 }
 
 void bool_const_class::make_alloca(CgenEnvironment *env)
@@ -1202,7 +1275,11 @@ void bool_const_class::make_alloca(CgenEnvironment *env)
   if (cgen_debug)
     std::cerr << "Boolean Constant" << std::endl;
 
-  // TODO: add code here
+  ValuePrinter vp(*env->cur_stream);
+
+  operand hold = vp.alloca_mem(op_type(INT1));
+  // env->add_binding(, &hold)
+  //  TODO: add code here
 }
 
 void object_class::make_alloca(CgenEnvironment *env)
@@ -1216,7 +1293,7 @@ void object_class::make_alloca(CgenEnvironment *env)
 void no_expr_class::make_alloca(CgenEnvironment *env)
 {
   if (cgen_debug)
-    std::cerr << "No_expr" << std::endl;
+    std::cerr << "No_expr Alloca" << std::endl;
 
   // TODO: add code here
 }

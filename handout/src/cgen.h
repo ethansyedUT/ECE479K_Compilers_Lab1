@@ -231,7 +231,7 @@ public:
     var_table.enterscope();
     // TODO: Walk here for variables???
     // cur_class->dump(*cur_stream, 10);
-    var_table.exitscope();
+    // var_table.exitscope();
   }
 
   // fresh name generation functions
