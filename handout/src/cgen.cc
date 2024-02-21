@@ -838,7 +838,7 @@ operand cond_class::code(CgenEnvironment *env)
   vp.branch_uncond(bEnd);
 
   vp.begin_block(bEnd);
-  retVal = vp.load(retVal.get_type(), retVal);
+  retVal = vp.load(retVal.get_type().get_deref_type(), retVal);
 
   return retVal;
 }

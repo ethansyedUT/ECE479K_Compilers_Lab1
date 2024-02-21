@@ -20,7 +20,7 @@ bfalse0:
 	br label %end0
 
 end0:
-	%vtpm.4 = load i32*, i32* %vtpm.0
+	%vtpm.4 = load i32, i32* %vtpm.0
 	ret i32 %vtpm.4
 }
 
