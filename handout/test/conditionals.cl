@@ -1,11 +1,6 @@
 class Main {
     main() : Int {{
-        if true
-        then 1 + 2
-        else 5 + 7
-        fi;
-
-        if false
+        if 5 < 7
         then 1 + 2
         else 5 + 7
         fi;

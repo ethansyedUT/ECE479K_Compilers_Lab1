@@ -730,12 +730,13 @@ void method_class::code(CgenEnvironment *env)
   }
 
   ValuePrinter vp(*env->cur_stream);
-  // TODO: add code here
 
   std::vector<operand> null;
   vp.define(op_type(INT32), "Main_main", null);
 
-  vp.begin_block(name->get_string());
+  // change in later labs
+  //  vp.begin_block(name->get_string());
+  vp.begin_block("entry");
 
   // code() called with method's expression
   operand finalExpression = expr->code(env);
@@ -762,7 +763,18 @@ operand assign_class::code(CgenEnvironment *env)
   // TODO: add code here and replace `return operand()`
   // gaming time
 
-  return operand();
+  // get ptr to name
+  // resolve the expression and store in temp
+  // store the temp into the ptr to the name
+  // return the value of the resolved expr
+
+  // Find symbol within env table
+  operand findSym = *env->find_in_scopes(name);
+  operand store = vp.getelementptr(findSym.get_type().get_deref_type(), findSym, int_value(0), findSym.get_type());
+  operand value = expr->code(env);
+  vp.store(value, store);
+
+  return value;
 }
 
 operand cond_class::code(CgenEnvironment *env)
@@ -770,25 +782,65 @@ operand cond_class::code(CgenEnvironment *env)
   if (cgen_debug)
   {
     std::cerr << "cond" << std::endl;
-    std::cerr << "IDENTIFIER: " << pred->code(env).get_name() << std::endl;
   }
-  // TODO : COME BACK AFTER ADRESSING KNOWLEDGE GAP
 
   // resolve predicate
   // if predicate
   // then resolve then_exp
   // else resolve else_exp
 
-  // BAD RESOLVE
-  // It could resolve to a temp reg which will be named %vtpm.x
-  if (pred->code(env).get_name() == "true")
-  {
-    return then_exp->code(env);
-  }
-  else
-  {
-    return else_exp->code(env);
-  }
+  ValuePrinter vp(*env->cur_stream);
+
+  // multiple llvm basic blocks needed
+
+  // allocate stack room for the ret val (check if type int or bool)
+
+  // first resolve the predicate to a operand / virtual reg (predResult)
+  // predResult -> vp.branch
+
+  // generate a new label & declare true basic block
+  // create the true basic block with then_expression
+
+  // generate a new label & declare false basic block
+  // create the false basic block with else_expression
+
+  // generate a end/return block
+
+  // QUESTION: How to use select??
+
+  std::string typeCheck = then_exp->get_type()->get_string();
+  operand retVal;
+  if (typeCheck == "Int")
+    retVal = vp.alloca_mem(op_type(INT32));
+  else if (typeCheck == "Bool")
+    retVal = vp.alloca_mem(op_type(INT1));
+
+  // Do I need to type check here? (I NEED TO FOR LAB2)
+  operand branchOp = pred->code(env);
+
+  // branch names
+  std::string btrue = env->new_label("btrue", false);
+  std::string bfalse = env->new_label("bfalse", false);
+  std::string bEnd = env->new_label("end", true);
+
+  operand bResult;
+
+  vp.branch_cond(branchOp, btrue, bfalse);
+
+  vp.begin_block(btrue);
+  bResult = then_exp->code(env);
+  vp.store(bResult, retVal);
+  vp.branch_uncond(bEnd);
+
+  vp.begin_block(bfalse);
+  bResult = else_exp->code(env);
+  vp.store(bResult, retVal);
+  vp.branch_uncond(bEnd);
+
+  vp.begin_block(bEnd);
+  retVal = vp.load(retVal.get_type(), retVal);
+
+  return retVal;
 }
 
 operand loop_class::code(CgenEnvironment *env)
@@ -853,10 +905,8 @@ operand let_class::code(CgenEnvironment *env)
   {
     // if no_expr, assign default vals based on type
     if (type_decl->get_string() == "Int")
-      // value = vp.getelementptr(op_type(INT32), opToStore, int_value(0), op_type(INT32));
       value = int_value(0);
     else if (type_decl->get_string() == "Bool")
-      // value = vp.getelementptr(op_type(INT1), opToStore, bool_value(false, true), op_type(INT1));
       value = bool_value(false, true);
   }
 
