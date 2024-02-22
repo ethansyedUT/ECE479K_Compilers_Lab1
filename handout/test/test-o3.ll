@@ -11,13 +11,13 @@ declare void @abort() local_unnamed_addr
 define i32 @Main_main() local_unnamed_addr {
 entry:
   tail call void @abort()
-  ret i32 poison
+  ret i32 0
 }
 
 define i32 @main() local_unnamed_addr {
 entry:
   tail call void @abort()
-  %vtpm.4 = tail call i32 (i8*, ...) @printf(i8* nonnull dereferenceable(1) getelementptr inbounds ([25 x i8], [25 x i8]* @.str, i64 0, i64 0), i32 undef)
+  %vtpm.3 = tail call i32 (i8*, ...) @printf(i8* nonnull dereferenceable(1) getelementptr inbounds ([25 x i8], [25 x i8]* @.str, i64 0, i64 0), i32 0)
   ret i32 0
 }
 

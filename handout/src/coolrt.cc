@@ -44,7 +44,7 @@ const Bool_vtable _Bool_vtable_prototype = {
         .size = sizeof(struct Bool),
         .name = Bool_string,
 
-        .abort_bool     = Object_abort,
+        ._bool     = Object_abort,
         .type_name_bool = Object_type_name,
         .copy_bool      = Object_copy
 };

@@ -990,14 +990,20 @@ operand divide_class::code(CgenEnvironment *env)
 
   // divide by 0 check
   operand divResult = e2->code(env);
+  operand retVal;
   if (divResult.get_name() == "0")
   {
     std::vector<op_type> empty;
     std::vector<operand> nun;
     vp.call(empty, op_type(VOID), "abort", true, nun);
+    retVal = int_value(0);
+  }
+  else
+  {
+    retVal = vp.div(e1->code(env), divResult);
   }
 
-  return vp.div(e1->code(env), divResult);
+  return retVal;
 }
 
 operand neg_class::code(CgenEnvironment *env)
@@ -1073,7 +1079,7 @@ operand int_const_class::code(CgenEnvironment *env)
 
   ValuePrinter vp(*env->cur_stream);
 
-  int_value intConst = int_value(std::stoi(token->get_string()));
+  int_value intConst = int_value(std::stol(token->get_string()));
   return intConst;
 }
 
